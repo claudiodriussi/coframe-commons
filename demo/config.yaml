@@ -1,0 +1,61 @@
+# configuration for the commons demo app
+#
+# `demo` is the reference app of this repository: it exists to exercise and
+# show the shared plugins, and it is the only consumer that ships with them.
+# Real apps live elsewhere and point at ../plugins as an out-of-root root.
+name: demo
+version: 0.0.1
+description: "Reference app for the coframe shared plugins"
+license: MIT
+author: "Claudio Driussi"
+log_file: "demo.log"
+
+# plugin roots. The single root is the sibling `plugins/` directory: this repo
+# *is* the shared root, and the demo consumes it exactly as an external app
+# would (relative path, out of its own tree).
+#
+# Bare path = the whole root, deliberately: the demo is this repository's
+# showcase, so a plugin added here must show up in it without an edit. A real
+# application does the opposite and names what it uses:
+#     plugins:
+#       - path: ../../commons/plugins
+#         include: [users, partners]
+plugins: [../plugins]
+
+# db engine for sqlalchemy
+db_engine: "sqlite:///demo.sqlite"
+
+# API configuration
+api:
+  prefix: "coframe"
+  port: 8302           # devtest 8300, artmob 8301, demo 8302
+
+schema:
+  display_field_names: [name, title, description]
+
+dataview:
+  page_size: 100
+  reload_all_threshold: 5000
+
+# Application locale
+locale: it
+
+menu:
+  default_root: main
+
+# table and fields used for authentication (commons/users provides User)
+authentication:
+  user_table: User
+  username_field: username
+  password_field: password
+  context_fields: [id, email, is_active, is_admin]
+  jwt_expiration_hours: 24
+  jwt_refresh_interval_minutes: 20
+
+# addiction imports for the source code generator
+source_add: |
+  def initialize_db(db_url: str):
+      from sqlalchemy import create_engine
+      engine = create_engine(db_url)
+      Base.metadata.create_all(engine)
+      return engine

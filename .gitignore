@@ -1,0 +1,14 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+*.egg-info
+
+# Demo app runtime artefacts (model.py is generated from the YAML schema)
+demo/model.py
+demo/*.sqlite
+demo/*.log
+demo/data/
+
+# Editors / environments
+.venv
+.vscode

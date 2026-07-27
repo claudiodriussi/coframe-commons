@@ -1,0 +1,201 @@
+types:
+
+  ID:
+    base: Integer
+    primary_key: True
+    autoincrement: True
+    label: "Unique Identifier"
+    help: |
+      The primary key for the table
+
+  ShortID:
+    base: String
+    length: 32
+    primary_key: True
+    label: "Unique Identifier"
+    help: |
+      The primary key for the table
+
+  ShortStr:
+    base: String
+    length: 32
+
+  Code:
+    base: ShortStr
+    index: True
+
+  Description:
+    base: String
+    nullable: False
+
+  Name:
+    base: Description
+    index: True
+
+  Password:
+    base: String
+    nullable: False
+    widget: password
+    label: "Password"
+    help: |
+      Please insert a robust password and keep it safe
+
+  Email:
+    base: String
+    widget: email
+    validate: email_validator
+
+  Json:
+    base: JSON
+    widget: json
+    default: {}
+    nullable: True
+
+  Markdown:
+    base: Text
+    widget: markdown
+
+  Phone:
+    base: String
+    widget: tel
+    length: 20
+    nullable: true
+
+  URL:
+    base: String
+    widget: url
+    length: 512
+    nullable: true
+
+  Color:
+    base: String
+    widget: color
+    length: 7
+    nullable: true
+    label: "Color"
+    help: "Hex color code (e.g., #FF5733)"
+
+  FilePath:
+    base: String
+    widget: filepath
+    length: 512
+    nullable: true
+    label: "File Path"
+    help: "Path to uploaded file or resource"
+
+  Money:
+    base: Numeric
+    widget: currency
+    precision: 10
+    scale: 2
+    nullable: true
+
+  Percent:
+    base: Numeric
+    widget: percent
+    precision: 5
+    scale: 2
+    nullable: true
+
+  Quantity:
+    base: Numeric
+    precision: 12
+    scale: 3
+    nullable: true
+
+  TimeStamp:
+    label: "Timestamp"
+    columns:
+      - name: created_at
+        type: DateTime
+        granularity: second
+        default: datetime.now()
+        nullable: False
+      - name: updated_at
+        type: DateTime
+        granularity: second
+        default: datetime.now()
+        nullable: False
+
+  Address:
+    label: "Address"
+    columns:
+      - name: address
+        type: String
+        nullable: True
+      - name: city
+        type: String
+        nullable: True
+      - name: state
+        type: String
+        nullable: True
+      - name: zip
+        type: String
+        nullable: True
+      - name: country
+        type: String
+        nullable: True
+
+  Archivable:
+    label: "Archivable"
+    columns:
+      - name: active
+        type: Boolean
+        default: true
+        nullable: false
+        label: "Active"
+
+  Credentials:
+    label: "Authentication Credentials"
+    columns:
+      - name: username
+        type: ShortStr
+        unique: true
+        nullable: false
+        label: "Username"
+        help: "Unique login username"
+      - name: password
+        type: Password
+        label: "Password"
+      - name: email
+        type: Email
+        unique: true
+        nullable: false
+        label: "Email"
+      - name: is_active
+        type: Boolean
+        default: true
+        nullable: false
+        label: "Active"
+      - name: last_login
+        type: DateTime
+        nullable: true
+        label: "Last Login"
+
+tables:
+
+  Config:
+    name: configs
+    label: "Configuration"
+    help: |
+      Wide app configuration file
+    tags: [short]
+
+    columns:
+      - name: id
+        type: ShortID
+
+      - name: description
+        type: Description
+
+      - name: group
+        type: ShortStr
+
+      - name: help
+        type: Markdown
+
+      - name: value
+        type: String
+
+      - name: values
+        type: Json
