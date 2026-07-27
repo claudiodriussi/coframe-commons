@@ -14,13 +14,18 @@ log_file: "demo.log"
 # *is* the shared root, and the demo consumes it exactly as an external app
 # would (relative path, out of its own tree).
 #
-# Bare path = the whole root, deliberately: the demo is this repository's
-# showcase, so a plugin added here must show up in it without an edit. A real
-# application does the opposite and names what it uses:
-#     plugins:
-#       - path: ../../commons/plugins
-#         include: [users, partners]
-plugins: [../plugins]
+# The demo normally takes the whole root — it is this repository's showcase, so
+# a plugin added here should show up without an edit:
+#     plugins: [../plugins]
+#
+# PINNED, temporarily. `partners` cannot be loaded yet: its `parent_id` is a
+# self-referencing foreign key, and the model generator does not support those
+# (see docs/pending/codegen_self_fk.md). The schema is written and reviewed;
+# only the code generation is missing. Drop the include and go back to the bare
+# path once that is fixed.
+plugins:
+  - path: ../plugins
+    include: [common, users]
 
 # db engine for sqlalchemy
 db_engine: "sqlite:///demo.sqlite"

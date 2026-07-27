@@ -1,0 +1,188 @@
+# Business partners.
+#
+# One table for every subject the company deals with — customers, suppliers,
+# members, employees, contacts — because the same person or firm is routinely
+# more than one of those, and separate tables would mean entering them twice
+# and letting their addresses drift apart.
+#
+# What separates them is not the table but the *view*: each role gets its own
+# menu entry, with a fixed `domain` on `roles` and `defaults` that stamps the
+# role on insert. The model stays single; the UI stays distinct.
+#
+# The table is deliberately lean. Role-specific fields — agent code, payment
+# terms, credit limit — are added by the plugins that need them, through
+# deep_merge, and the result is a flat table with many nullable columns. That
+# is the intended shape: nullable columns cost nothing in SQL, while satellite
+# tables would cost a join and a sub-form for every role.
+#
+# Invariant that keeps it sane: **role-specific columns are always nullable in
+# the schema**. Requiredness belongs to the view, as a reactive `required`, not
+# to the database — a NOT NULL column of one role would stop the records of
+# every other role from being created at all.
+
+tables:
+
+  Partner:
+    name: partners
+    label: "Partner"
+    help: |
+      Any subject the company deals with. Roles (customer, supplier, member…)
+      are held in `roles` as a delimited set, so one subject can be several
+      things at once without being entered twice.
+    tags: [master]
+    mixins: [TimeStamp, Archivable]
+
+    columns:
+
+      - name: id
+        type: ID
+
+      - name: code
+        type: Code
+        label: "Code"
+        help: "Registry code, independent of any role"
+
+      # person | organization  (+ association, public, group as they turn up)
+      #
+      # Nullable because a child row that is only an address is neither. It is
+      # required for top-level subjects, and that is expressed in the view as a
+      # reactive `required` on `parent_id == null`, not as a NOT NULL here.
+      #
+      # Legal form (SRL, SPA, SNC) does NOT belong in this column: it is a
+      # property *of* an organization, not an alternative to being one. Putting
+      # it here would silently break every rule written as `kind ==
+      # 'organization'` the day the first `srl` was stored. It gets its own
+      # `legal_form` column when it is needed.
+      - name: kind
+        type: ShortStr
+        label: "Kind"
+
+      # Official designation, and the display field everywhere.
+      #
+      # For an organization it is the registered name, typed. For a person it
+      # is "Surname, Given" — the comma makes the split deterministic in both
+      # directions, which is why the parts are not stored separately: composing
+      # is always possible, and with the comma so is decomposing.
+      #
+      # It is also the fiscally correct name: a sole trader invoices as
+      # "Rossi, Paolo" even when the shop sign reads otherwise.
+      - name: name
+        type: Name
+        label: "Name"
+
+      # Shop sign / trading name, when it differs from the registered one.
+      # Searchable, but never the display: whoever types "Ferramenta" finds the
+      # record and is shown "Rossi, Paolo".
+      - name: trade_name
+        type: String
+        label: "Trade name"
+
+      - name: title
+        type: ShortStr
+        label: "Title"
+        help: "Sig., Sig.ra, Dott. — free text, suggestions come from the view"
+
+      # Roles held, as a delimited set: ",C,S," — never packed characters.
+      #
+      # Delimiters are not decoration: searching ",C," can never match ",CO,",
+      # whereas "C" inside "CS" would match the first two-character code added
+      # and break every existing filter without a word of warning.
+      #
+      # A set rather than one column per role, because a new role must be a new
+      # row in `Role`, not an ALTER on a shared table. A set rather than a
+      # single code, because a subject really is customer and supplier at once.
+      #
+      # Not indexed: a LIKE with a leading wildcard would not use the index.
+      - name: roles
+        type: String
+        length: 255
+        label: "Roles"
+
+      # Parent subject, for rows that hang off another one: a contact person,
+      # a delivery address, a billing address. Qualified by `usage` below.
+      - name: parent_id
+        nullable: true
+        label: "Belongs to"
+        foreign_key:
+          target: Partner.id
+
+      # What a child row is, relative to its parent:
+      #   contact | invoice | delivery | operational
+      # Empty for top-level subjects. Kept apart from `kind` because the two
+      # answer different questions — what the row *is* versus how it is *used*.
+      - name: usage
+        type: ShortStr
+        label: "Usage"
+
+      # Neither is unique: foreign subjects have no Italian VAT number, private
+      # individuals have no VAT number at all, and duplicates legitimately exist
+      # until someone merges them. They are indexed and drive the duplicate
+      # warning on save.
+      - name: vat_number
+        type: Code
+        label: "VAT number"
+
+      - name: tax_code
+        type: Code
+        label: "Tax code"
+
+      # Main address, inline. Additional addresses are child rows with a
+      # `usage`, which is why there is no address table: a child row already
+      # carries a full address, a name and its own channels.
+      - name: address
+        type: Address
+
+      # Primary channels inline — searched, exported and printed without a
+      # join. Further ones are child rows, same as addresses.
+      - name: email
+        type: Email
+        label: "Email"
+
+      - name: phone
+        type: Phone
+        label: "Phone"
+
+      - name: mobile
+        type: Phone
+        label: "Mobile"
+
+      - name: website
+        type: URL
+        label: "Website"
+
+      - name: notes
+        type: Markdown
+        label: "Notes"
+
+      # Set when this record was merged into another as a duplicate. The record
+      # is archived rather than deleted, so a wrong merge stays recoverable and
+      # outside references still resolve.
+      - name: merged_into_id
+        nullable: true
+        label: "Merged into"
+        foreign_key:
+          target: Partner.id
+
+  Role:
+    name: partner_roles
+    label: "Partner role"
+    help: |
+      The roles a partner may hold. A registry rather than YAML values because
+      the values belong to the business: an installation adds "agent" or
+      "member" by inserting a row, not by editing a plugin.
+    tags: [reference]
+
+    columns:
+
+      # The code is the key: it is the value stored inside Partner.roles.
+      - name: id
+        type: ShortID
+        label: "Code"
+
+      - name: label
+        type: Description
+        label: "Label"
+
+      - name: sequence
+        type: Integer
+        label: "Sequence"

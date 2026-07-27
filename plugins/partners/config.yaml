@@ -1,0 +1,7 @@
+name: partners
+version: 0.0.1
+description: Business partners — one subject table, roles as a set
+license: MIT
+author: "Claudio Driussi"
+url: https://claudiodriussi.it
+depends_on: [common]
