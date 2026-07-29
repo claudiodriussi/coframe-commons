@@ -105,6 +105,11 @@ tables:
         label: "Belongs to"
         foreign_key:
           target: Partner.id
+          # `backref` because the generated name would be `partners_parent`:
+          # correct and unreadable. `relation` is the default here (the column
+          # minus its suffix), stated for symmetry with the pair below.
+          relation: parent
+          backref: children
 
       # What a child row is, relative to its parent:
       #   contact | invoice | delivery | operational
@@ -162,6 +167,8 @@ tables:
         label: "Merged into"
         foreign_key:
           target: Partner.id
+          relation: merged_into
+          backref: duplicates
 
   Role:
     name: partner_roles

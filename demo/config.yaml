@@ -14,18 +14,9 @@ log_file: "demo.log"
 # *is* the shared root, and the demo consumes it exactly as an external app
 # would (relative path, out of its own tree).
 #
-# The demo normally takes the whole root — it is this repository's showcase, so
-# a plugin added here should show up without an edit:
-#     plugins: [../plugins]
-#
-# PINNED, temporarily. `partners` cannot be loaded yet: its `parent_id` is a
-# self-referencing foreign key, and the model generator does not support those
-# (see docs/pending/codegen_self_fk.md). The schema is written and reviewed;
-# only the code generation is missing. Drop the include and go back to the bare
-# path once that is fixed.
-plugins:
-  - path: ../plugins
-    include: [common, users]
+# The demo takes the whole root — it is this repository's showcase, so a plugin
+# added here shows up without an edit.
+plugins: [../plugins]
 
 # db engine for sqlalchemy
 db_engine: "sqlite:///demo.sqlite"
