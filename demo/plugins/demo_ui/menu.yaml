@@ -1,0 +1,29 @@
+# Menu of the demo application.
+#
+# The shared plugins are menu-silent: they declare tables, not placement, so
+# each application decides what surfaces and where. Roles are part of that
+# decision — the codes `C` and `S` are the application's, and so are the views
+# that filter on them.
+
+menus:
+  main:
+    label: Coframe demo
+
+menu_items:
+
+  # ── Groups ────────────────────────────────────────────────────────────────
+  partners:       { label: Partners,       icon: contact,  order: 10 }
+  administration: { label: Administration, icon: settings, order: 90 }
+
+  # ── Partners ──────────────────────────────────────────────────────────────
+  # One entry per role, plus the registry itself: the role views hide whoever
+  # does not hold the role, so promoting an existing subject is only possible
+  # from the unfiltered list.
+  customers:  { label: Customers,     icon: user-round, parent: partners, order: 10, action: stack_push, panel: customer_list }
+  suppliers:  { label: Suppliers,     icon: truck,      parent: partners, order: 20, action: stack_push, panel: supplier_list }
+  registry:   { label: All partners,  icon: book-user,  parent: partners, order: 30, action: stack_push, panel: partner_list }
+  roles:      { label: Partner roles, icon: tags,       parent: partners, order: 90, action: stack_push, panel: partnerrole_list }
+
+  # ── Administration ────────────────────────────────────────────────────────
+  users:  { label: Users,         icon: users,     parent: administration, order: 10, action: stack_push, panel: user_list }
+  config: { label: Configuration, icon: settings,  parent: administration, order: 90, action: stack_push, panel: config_list }

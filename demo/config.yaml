@@ -10,13 +10,17 @@ license: MIT
 author: "Claudio Driussi"
 log_file: "demo.log"
 
-# plugin roots. The single root is the sibling `plugins/` directory: this repo
-# *is* the shared root, and the demo consumes it exactly as an external app
-# would (relative path, out of its own tree).
+# plugin roots.
 #
-# The demo takes the whole root — it is this repository's showcase, so a plugin
-# added here shows up without an edit.
-plugins: [../plugins]
+# `../plugins` is the sibling shared root: this repo *is* that root, and the
+# demo consumes it exactly as an external app would (relative path, out of its
+# own tree). It takes the whole root — this is the showcase of the repository,
+# so a shared plugin added there shows up without an edit here.
+#
+# `plugins` is the demo's own root, and it holds what belongs to the
+# application rather than to the shared plugins: the menu, and the views whose
+# domain names a role code.
+plugins: [../plugins, plugins]
 
 # db engine for sqlalchemy
 db_engine: "sqlite:///demo.sqlite"
@@ -34,7 +38,7 @@ dataview:
   reload_all_threshold: 5000
 
 # Application locale
-locale: it
+locale: en
 
 menu:
   default_root: main

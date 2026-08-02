@@ -1,0 +1,65 @@
+# Views of the demo application.
+#
+# The three partner lists are the same table seen through different eyes:
+# `domain` fixes what the view shows, `defaults` fixes what a record added from
+# it is born as. Both live on `source`, so the navigator stays generic.
+
+views:
+
+  # Column layout shared by the three partner lists. Referenced with $ref;
+  # sibling keys override it, and `source` is written out by each page because
+  # the merge is shallow.
+  partner_table:
+    type: table
+    columns:
+      - field: name
+        title: Name
+      - field: trade_name
+        title: Trade name
+      - field: kind
+        title: Kind
+        width: 110
+      - field: roles
+        title: Roles
+        width: 110
+      - field: city
+        title: City
+      - field: email
+        title: Email
+      - field: phone
+        title: Phone
+        width: 140
+    navigator: true
+
+pages:
+
+  # The registry: no domain, so it is the only place where a subject that holds
+  # no role yet can be found and given one.
+  partner_list:
+    title: All partners
+    content:
+      $ref: views.partner_table
+      source:
+        model: Partner
+        order_by: [name]
+
+  customer_list:
+    title: Customers
+    content:
+      $ref: views.partner_table
+      source:
+        model: Partner
+        order_by: [name]
+        # Delimiters included on both sides: ",C," can never match ",CO,".
+        domain: [{roles: [like, "%,C,%"]}]
+        defaults: {roles: ",C,"}
+
+  supplier_list:
+    title: Suppliers
+    content:
+      $ref: views.partner_table
+      source:
+        model: Partner
+        order_by: [name]
+        domain: [{roles: [like, "%,S,%"]}]
+        defaults: {roles: ",S,"}

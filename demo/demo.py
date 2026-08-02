@@ -47,17 +47,44 @@ def setup(generate: bool = True):
 
 
 def seed(app, model):
-    """Create the admin user on an empty database (dev credentials: admin/admin)."""
+    """Fill an empty database with what the demo needs in order to show something.
+
+    Development data, not a mechanism: every table is filled only while it is
+    empty, so whatever is entered from the UI is left alone. Dev credentials are
+    admin/admin.
+    """
     with app.get_session() as session:
-        if session.query(model.User).first():
-            return
-        session.add(model.User(
-            name="Administrator",
-            username="admin",
-            password="admin",
-            email="admin@example.com",
-            is_admin=True,
-        ))
+        if not session.query(model.User).first():
+            session.add(model.User(
+                name="Administrator",
+                username="admin",
+                password="admin",
+                email="admin@example.com",
+                is_admin=True,
+            ))
+
+        # The role codes belong to the application: the Customers and Suppliers
+        # views filter on ",C," and ",S," and stamp them on what is added there.
+        if not session.query(model.PartnerRole).first():
+            session.add_all([
+                model.PartnerRole(id="C", label="Customer", sequence=10),
+                model.PartnerRole(id="S", label="Supplier", sequence=20),
+            ])
+
+        if not session.query(model.Partner).first():
+            session.add_all([
+                model.Partner(kind="person", name="Smith, John", roles=",C,",
+                              city="Bristol", email="john@example.com"),
+                model.Partner(kind="organization", name="Riverside Hardware Ltd",
+                              roles=",S,", city="Leeds"),
+                # Both at once — the case that makes one table worth having.
+                model.Partner(kind="organization", name="Northwind Trading",
+                              roles=",C,S,", city="Hull"),
+                # No role yet: reachable only from the unfiltered list, which is
+                # where a subject is promoted to customer or supplier.
+                model.Partner(kind="person", name="Doe, Jane", city="York"),
+            ])
+
         session.commit()
 
 
@@ -69,8 +96,8 @@ def main():
     plugins.load_all_locales()
     seed(app, model)
 
-    print(f"Plugins caricati: {', '.join(plugins.sorted)}")
-    print(f"Tabelle: {', '.join(sorted(app.tables.keys()))}")
+    print(f"Plugins loaded: {', '.join(plugins.sorted)}")
+    print(f"Tables: {', '.join(sorted(app.tables.keys()))}")
 
     with app.get_session() as session:
         for user in session.query(model.User).all():
