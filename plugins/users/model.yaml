@@ -23,6 +23,9 @@ tables:
         label: "Administrator"
         type: Boolean
         default: False
+        # A boolean the authentication context reads: three states would mean
+        # a user who is neither administrator nor not.
+        nullable: false
 
   UserLog:
     name: user_logs
@@ -37,6 +40,9 @@ tables:
       - name: message
         type: String
 
+      # Nullable is the default, but here it is load-bearing rather than
+      # incidental: deleting a user sets this to NULL, so the column cannot be
+      # made mandatory later without breaking the referential action.
       - name: user_id
         nullable: true
         foreign_key:
