@@ -1,3 +1,17 @@
+# The shapes every application turns out to need, named once.
+#
+# Without them each application decides again how long a code is, whether a name
+# is indexed, how money is rounded — and decides it differently in each table,
+# because the decision is made where the column is written. Here a column says
+# *what it is*, and how it is stored is one line, in one place: raise `ShortStr`
+# to 64 and every code in every application follows.
+#
+# They carry the interface too. `widget:`, `label:` and `help:` travel with the
+# type, so a form and a list know how to render a column without being told.
+#
+# It is a vocabulary, not a constraint: what does not fit is derived, not
+# argued with.
+
 types:
 
   ID:
@@ -16,6 +30,11 @@ types:
     help: |
       The primary key for the table
 
+  # A chain, one decision per link: `ShortStr` fixes a width, `Code` adds the
+  # index, `UpperStr` the case. A column then names the combination it wants
+  # instead of restating it, and a decision added to a link reaches everything
+  # below it — which is also how an application extends the vocabulary, by
+  # hanging its own link off the one that already says most of what it means.
   ShortStr:
     base: String
     length: 32
@@ -24,6 +43,9 @@ types:
     base: ShortStr
     index: True
 
+  # For identifiers whose alphabet is upper case anyway — tax and VAT numbers,
+  # ISO codes: the value is normalised on write, searches included, so the code
+  # around them never has to convert.
   UpperStr:
     base: ShortStr
     case: upper
@@ -32,6 +54,8 @@ types:
     base: UpperStr
     index: True
 
+  # Not nullable by its own definition: this is the type of what a record cannot
+  # be without — say `Description` and the column is required without saying so.
   Description:
     base: String
     nullable: False
@@ -103,6 +127,9 @@ types:
     precision: 12
     scale: 3
 
+  # When a row appeared and when it was last touched. Two columns nobody wants
+  # to declare and everybody wants to have — the first question asked of any
+  # record that looks wrong.
   TimeStamp:
     label: "Timestamp"
     columns:
@@ -117,6 +144,9 @@ types:
         default: datetime.now()
         nullable: False
 
+  # Five columns that always travel together, declared once: every table that
+  # has an address has the same one, and widening it here reaches them all.
+  # `prefix:` lets a single table carry two of them — home_city, work_city.
   Address:
     label: "Address"
     columns:
@@ -131,6 +161,10 @@ types:
       - name: country
         type: String
 
+  # Retiring a row instead of deleting it — the history that points at it stays
+  # readable. More than a column: the Python class of the same name is a query
+  # behaviour, registered once at startup, so every table carrying the mixin
+  # hides its archived rows without a single view asking for it.
   Archivable:
     label: "Archivable"
     columns:
@@ -140,6 +174,10 @@ types:
         nullable: false
         label: "Active"
 
+  # What makes a table able to log in. Kept as one unit because authentication
+  # reads all of it — the application points its `authentication` config at any
+  # table carrying this, and system users and application users can be separate
+  # tables without either growing its own idea of what a login is.
   Credentials:
     label: "Authentication Credentials"
     columns:

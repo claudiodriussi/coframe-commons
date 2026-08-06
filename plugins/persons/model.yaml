@@ -1,28 +1,14 @@
 # Registry data of a natural person, merged into `Partner`.
 #
-# Everything here is nullable, and for two reasons at once: the same table holds
-# organizations, which have none of it, and a partner is routinely created from
-# a customer list where none of it is asked. Requiredness belongs to the view,
-# as a reactive `required`, exactly as it does for the role-specific columns of
-# the base — see the invariant in partners/model.yaml.
+# Nullable throughout: the same table holds organizations, and a partner created
+# from a customer list is asked none of this. The view makes the section visible
+# on `kind == 'person'` and requires what it needs.
 #
-# In the form these fields belong to a section visible on `kind == 'person'`.
-# That is a pure reactive property: the schema stays nullable, the view decides
-# what is shown.
-#
-# What is deliberately *not* here:
-#
-#   - No birth place. In the form that is actually useful it is a coded
-#     municipality — for Italy the cadastral code the tax code is built from —
-#     and that is country-specific: it belongs to the country plugin that owns
-#     the lookup, added by deep_merge on top of this one. As free text it would
-#     be half a thing: not enough to compute with, and in the way of every
-#     application that does not need it.
-#
-#   - No separate fiscal sex. `gender` in the base is the one axis, and a tax
-#     code calculator that needs one of two values treats anything else as a
-#     validation matter — asks, or refuses. Two columns overlapping on 95% of
-#     the rows would drift, and nothing would say which one is right.
+# Deliberately not here: the place of birth, which in the form that is useful is
+# a coded municipality and so belongs to the country plugin that owns the
+# lookup; and a separate fiscal sex, since `gender` in the base is the one axis
+# and a calculator that needs `M` or `F` treats anything else as validation.
+# config.yaml says where the line between this plugin and `partners` falls.
 
 tables:
 
@@ -30,26 +16,22 @@ tables:
 
     columns:
 
-      # Date of birth. Not recycled for the incorporation date of an
-      # organization: the two are never the same question — "members turning 18
-      # this month" and "companies founded before 2000" would have to filter on
-      # `kind` to keep from catching each other — they do not carry the same
-      # privacy weight, and no name reads honestly for both. An organization
-      # gets `founded_on` when something needs to read it.
+      # Not recycled for the incorporation date of an organization: the two are
+      # never the same question — every query would have to filter on `kind` to
+      # avoid catching the other population — and they do not carry the same
+      # privacy weight. An organization gets `founded_on` when something reads
+      # it.
       - name: birth_date
         type: Date
         label: "Date of birth"
 
-      # ISO 3166-1 alpha-2, coded because things compute on it — the VAT prefix
-      # and the country of an e-invoice speak alpha-2 — and two characters wide
-      # so the schema itself refuses the other coding: `IT` and `ITA` are one
-      # country that no filter matches twice.
+      # Coded because things compute on it: the VAT prefix and the country of an
+      # e-invoice speak alpha-2. Two characters wide so the schema itself
+      # refuses the other coding — `IT` and `ITA` are one country that no filter
+      # matches twice. The country of an address is free text instead, being
+      # read rather than computed with.
       #
-      # The country of an address is free text instead, and deliberately: it is
-      # read, not computed with. An application that needs to compute derives
-      # `Address` and gives it a coded field.
-      #
-      # A plain code and not a foreign key: a country registry is a table this
+      # A plain code and not a foreign key: the country registry is a table this
       # plugin does not have and should not invent. When it arrives it declares
       # the foreign key on this same column by deep_merge.
       - name: citizenship

@@ -1,49 +1,14 @@
-# Business partners.
+# Business partners: one table for every subject the company deals with —
+# customers, suppliers, members, contacts, addresses. What separates the roles
+# is the view, not the table. See README.md.
 #
-# One table for every subject the company deals with — customers, suppliers,
-# members, employees, contacts — because the same person or firm is routinely
-# more than one of those, and separate tables would mean entering them twice
-# and letting their addresses drift apart.
+# Invariant: **role-specific columns are always nullable in the schema**, and
+# requiredness belongs to the view as a reactive `required` — a NOT NULL column
+# of one role would stop every other role from being created.
 #
-# What separates them is not the table but the *view*: each role gets its own
-# menu entry, with a fixed `domain` on `roles` and `defaults` that stamps the
-# role on insert. The model stays single; the UI stays distinct.
-#
-# The table is deliberately lean. Role-specific fields — agent code, payment
-# terms, credit limit — are added by the plugins that need them, through
-# deep_merge, and the result is a flat table with many nullable columns. That
-# is the intended shape: nullable columns cost nothing in SQL, while satellite
-# tables would cost a join and a sub-form for every role.
-#
-# Invariant that keeps it sane: **role-specific columns are always nullable in
-# the schema**. Requiredness belongs to the view, as a reactive `required`, not
-# to the database — a NOT NULL column of one role would stop the records of
-# every other role from being created at all.
-#
-# The same holds for the optional columns of the base table, and it needs no
-# declaration: a column that says nothing is nullable. The one mandatory column
-# is `name`, and it says so through its type — `Name` is a `Description`, which
-# is what a value no record can be without looks like.
-#
-# Two things are deliberately *not* here, recorded so they are not added back:
-#
-#   - No registry-wide `code`. A subject holds several roles at once, so one
-#     column could not carry both the member number and the employee number of
-#     the same person. Role plugins declare their own, and they are separate
-#     columns precisely because they are separate things.
-#
-#   - No registry data of a natural person — birth date, citizenship, documents.
-#     They are in the `persons` plugin, and the line between the two is not
-#     "does it concern a person" but what the application does with them:
-#     everyone *writes to* people, since a company's contact is one, and title,
-#     gender and the channels serve that from here; only some applications
-#     *keep a registry* of them, and only those take `persons`. The privacy
-#     weight falls on the same side of that line.
-#
-#   - No `merged_into` pointer. A column that only means something together
-#     with the command maintaining it belongs with that command — here it would
-#     be inert, and an inert column invites a half-implemented merge. It comes
-#     back, by deep_merge, with the plugin that can actually unify duplicates.
+# Deliberately not here, so they are not added back: a registry-wide `code`, the
+# registry data of a natural person (in `persons`), a `merged_into` pointer.
+# README.md says why.
 
 tables:
 
@@ -62,60 +27,29 @@ tables:
       - name: id
         type: ID
 
-      # What the subject is: `person` | `organization`.
+      # `person` | `organization`. A closed set owned by the code, and the one
+      # discriminator everything shares.
       #
-      # A closed set, owned by the code — the opposite of `roles` below, which
-      # an application extends. It is the one shared discriminator: the form
-      # reads it to render one "Name" box or two, `title` applies only to a
-      # person, birth data and legal form are mutually exclusive on it, the
-      # correspondence differs, and the privacy obligations differ. It lives in
-      # the base table so that all of them get the *same* answer — a plugin
-      # forced to infer it (from a comma in the name, from the presence of a VAT
-      # number) would eventually disagree with another plugin about one record.
+      # Write the test on the person side, `kind == 'person'`, so kinds added
+      # later (public body, group) fall among the non-persons. A sole trader is
+      # a `person`. Legal form is not a value here — it is a property *of* an
+      # organization, and gets its own column.
       #
-      # Nor can the view decide it: the same subject is opened from the customer
-      # list and from the members list, and must render the same either way.
-      # How a record shows itself comes from the record, not from the view — the
-      # single table would be pointless otherwise.
-      #
-      # Exactly one value means a natural person: `person`. Write the test on
-      # that side — `kind == 'person'` for the person branch, everything else
-      # for the rest — because new kinds (public body, group) are non-persons,
-      # so a rule written before they existed still puts them where they belong.
-      # A sole trader is `person`: legally it is one, and it invoices as
-      # "Smith, John" even when the shop sign reads otherwise.
-      #
-      # Legal form (Ltd, Inc, association) does NOT belong in this column: it is
-      # a property *of* an organization, not an alternative to being one, and
-      # its values are an open set that varies by country. Putting it here would
-      # silently break every rule written as `kind == 'organization'` the day
-      # the first `ltd` was stored. It gets its own `legal_form` column when it
-      # is needed — as a lookup whose rows state the `kind` they imply, so the
-      # two refine each other instead of drifting apart.
-      #
-      # Nullable because a child row that is only an address is neither. It is
-      # required for top-level subjects, and that is expressed in the view as a
-      # reactive `required` on `parent_id == null`, not as a NOT NULL here.
+      # Nullable because a child row that is only an address is neither; the
+      # view makes it required on `parent_id == null`.
       - name: kind
         type: ShortStr
         label: "Kind"
 
-      # Official designation, and the display field everywhere.
-      #
-      # For an organization it is the registered name, typed. For a person it
-      # is "Surname, Given" — the comma makes the split deterministic in both
-      # directions, which is why the parts are not stored separately: composing
-      # is always possible, and with the comma so is decomposing.
-      #
-      # It is also the fiscally correct name: a sole trader invoices as
-      # "Smith, John" even when the shop sign reads otherwise.
+      # Official designation, and the display field everywhere. For a person it
+      # is "Surname, Given": the comma is what makes composing and decomposing
+      # both possible, which is why the parts are not separate columns.
       - name: name
         type: Name
         label: "Name"
 
-      # Shop sign / trading name, when it differs from the registered one.
-      # Searchable, but never the display: whoever types "Riverside Hardware"
-      # finds the record and is shown "Smith, John".
+      # Shop sign, when it differs from the registered name. Searchable, never
+      # the display: whoever types "Riverside Hardware" is shown "Smith, John".
       - name: trade_name
         type: String
         label: "Trade name"
@@ -125,32 +59,22 @@ tables:
         label: "Title"
         help: "Mr., Mrs., Dr. — free text, suggestions come from the view"
 
-      # Composing the way one addresses someone, the same job `title` and the
-      # channels below do — which is why it is here and not in `persons`, where
-      # what an application keeps *about* a person lives.
+      # Part of addressing someone, like `title` and the channels below — which
+      # is why it is here and not in `persons`.
       #
       # `M` and `F` are the values the code knows: agreement in correspondence,
       # and the tax codes built from one of the two. Write the test on that side
       # so the others land where a rule written before them expects. `N` is not
       # the same as empty — asked and declined, against never asked.
-      #
-      # Not folded into `kind`: a property *of* a person, not an alternative to
-      # being one.
       - name: gender
         type: UpperStr
         length: 1
         label: "Gender"
         help: "M male, F female, O other, N not declared"
 
-      # Roles held, as a delimited set: ",C,S," — never packed characters.
-      #
-      # Delimiters are not decoration: searching ",C," can never match ",CO,",
-      # whereas "C" inside "CS" would match the first two-character code added
-      # and break every existing filter without a word of warning.
-      #
-      # A set rather than one column per role, because a new role must be a new
-      # row in `PartnerRole`, not an ALTER on a shared table. A set rather than
-      # a single code, because a subject really is customer and supplier at once.
+      # A delimited set of role codes: ",C,S,". The delimiters are not
+      # decoration — ",C," can never match ",CO,", where packed characters would
+      # let "C" match inside "CS" and break every filter, silently.
       #
       # Not indexed: a LIKE with a leading wildcard would not use the index.
       - name: roles
@@ -158,45 +82,34 @@ tables:
         length: 255
         label: "Roles"
 
-      # Parent subject, for rows that hang off another one: a contact person,
-      # a delivery address, a billing address. Qualified by `usage` below.
+      # Parent subject, for rows that hang off another one: a contact person, a
+      # delivery address, a billing address. Qualified by `usage` below.
       - name: parent_id
         label: "Belongs to"
         foreign_key:
           target: Partner.id
-          # `backref` because the generated name would be `partners_parent`:
-          # correct and unreadable. `relation` is the default here (the column
-          # minus its suffix), stated so the pair reads as one declaration.
+          # Named explicitly: the generated pair would be `partners_parent`,
+          # correct and unreadable.
           relation: parent
           backref: children
 
       # What a child row is, relative to its parent:
       #   contact | invoice | delivery | operational
       # Empty for top-level subjects. Kept apart from `kind` because the two
-      # answer different questions — what the row *is* versus how it is *used*.
-      #
-      # A closed set owned by the code, hence a plain column and not a registry
-      # like `PartnerRole`: invoice printing looks for `invoice`, shipping looks for
-      # `delivery`, and a value no code knows about is inert. A registry would
-      # promise an extensibility that does not exist and charge a join on every
-      # child row for it. `roles` is the other case, and gets the other answer.
-      #
-      # The values are offered by the view as a fixed choice. When the schema
-      # grows a declarative `values:` on a column, that is where they belong.
+      # answer different questions: what the row *is*, against how it is *used*.
+      # A plain column and not a registry — the code branches on these values,
+      # and the view offers them as a fixed choice.
       - name: usage
         type: ShortStr
         label: "Usage"
 
-      # Here rather than in a fiscal plugin because they identify the subject,
-      # the way the name does, and because the duplicate check on save is a
-      # property of the registry itself. What *is* country-specific — the
-      # checksum, the format, which of the two is mandatory — is validation, and
-      # that a plugin can add without owning the column.
+      # Identify the subject the way the name does, which is why they are here
+      # and not in a fiscal plugin; what is country-specific is validation, and
+      # a plugin adds that without owning the column.
       #
-      # Neither is unique: foreign subjects have no domestic VAT number, private
-      # individuals have no VAT number at all, and duplicates legitimately exist
-      # until someone unifies them. They are indexed and drive the duplicate
-      # warning on save.
+      # Neither is unique — foreign subjects, private individuals, and genuine
+      # duplicates until someone unifies them. Indexed, and they are what the
+      # duplicate warning is built on.
       - name: vat_number
         type: UpperCode
         label: "VAT number"
@@ -205,14 +118,14 @@ tables:
         type: UpperCode
         label: "Tax code"
 
-      # Main address, inline. Additional addresses are child rows with a
-      # `usage`, which is why there is no address table: a child row already
-      # carries a full address, a name and its own channels.
+      # Main address inline; further addresses are child rows with a `usage`.
+      # That is why there is no address table: a child row already carries a
+      # full address, a name and its own channels.
       - name: address
         type: Address
 
-      # Primary channels inline — searched, exported and printed without a
-      # join. Further ones are child rows, same as addresses.
+      # Primary channels inline — searched, exported and printed without a join.
+      # Further ones are child rows, same as addresses.
       - name: email
         type: Email
         label: "Email"
@@ -233,19 +146,10 @@ tables:
         type: Markdown
         label: "Notes"
 
-  # `PartnerRole` and not `Role`: authorisation roles will want that name, and
-  # two plugins declaring the same table are folded into one by deep_merge
-  # without a warning.
-  #
-  # Roles are declared by the application in its `data:` section and reconciled
-  # here at startup; one that nobody declares is inert, since no view filters on
-  # it and no default stamps it. Reconciliation writes only the declared keys,
-  # and never deletes a row: a dropped row would leave its code inside the
-  # `roles` of existing partners with nothing left to name it.
-  #
-  # A `defaults` JSON column belongs here — values to stamp on the partner when
-  # the role is attached, filling only what is still empty. It arrives with the
-  # behaviour that applies it.
+  # The application declares its roles in `data:` and they are reconciled at
+  # startup: reconciliation writes only the declared keys, and never deletes a
+  # row — a dropped row would leave its code inside the `roles` of existing
+  # partners with nothing left to name it.
   PartnerRole:
     name: partner_roles
     label: "Partner role"
@@ -271,12 +175,8 @@ tables:
       #
       # Never declared in a plugin's `data:` — numbers picked by two plugins
       # collide with nothing to arbitrate them. A declaration carries the
-      # position instead (`$after` / `$before`) and the loader turns it into a
-      # number on first insert; from then on it is the user's, and a reordering
-      # from the UI is never overwritten.
-      # Declared rather than left optional: it always has a value (the loader
-      # assigns one on insert, the default covers the rest) and a NULL would
-      # order the list differently on every database.
+      # position instead (`$after` / `$before`), and a reordering made from the
+      # UI is never overwritten.
       - name: sequence
         type: Integer
         label: "Sequence"

@@ -1,3 +1,14 @@
+# Who operates the application: the table authentication is pointed at.
+#
+# It carries no credential column of its own — `Credentials` does, and that is
+# what lets an application authenticate against a different table instead (a
+# library's members, a portal's users) by naming it in `authentication:`
+# without either table inventing its own idea of a login.
+#
+# Deliberately minimal: authorisation — groups, permissions, what a user may
+# see — is not here. It arrives, by deep_merge, with the plugin that enforces
+# it, because a permission column nothing reads permits everything.
+
 tables:
 
   User:
@@ -11,6 +22,9 @@ tables:
       - name: id
         type: ID
 
+      # The name for people to read; `Credentials` holds the one to log in with.
+      # Not indexed: users are found by username, and there are never enough of
+      # them for a scan to matter.
       - name: name
         type: Name
         index: False
@@ -27,6 +41,9 @@ tables:
         # a user who is neither administrator nor not.
         nullable: false
 
+  # What was done, kept apart from who may do it: a log line outlives the user
+  # it refers to, which is why the reference below is severed rather than
+  # cascaded, and why this table has no foreign key anyone else depends on.
   UserLog:
     name: user_logs
     mixins: [TimeStamp]
