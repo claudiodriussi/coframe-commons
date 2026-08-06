@@ -1,0 +1,55 @@
+# Registry data of a natural person, merged into `Partner`.
+#
+# Everything here is nullable, and for two reasons at once: the same table holds
+# organizations, which have none of it, and a partner is routinely created from
+# a customer list where none of it is asked. Requiredness belongs to the view,
+# as a reactive `required`, exactly as it does for the role-specific columns of
+# the base — see the invariant in partners/model.yaml.
+#
+# In the form these fields belong to a section visible on `kind == 'person'`.
+# That is a pure reactive property: the schema stays nullable, the view decides
+# what is shown.
+#
+# What is deliberately *not* here:
+#
+#   - No birth place. In the form that is actually useful it is a coded
+#     municipality — for Italy the cadastral code the tax code is built from —
+#     and that is country-specific: it belongs to the country plugin that owns
+#     the lookup, added by deep_merge on top of this one. As free text it would
+#     be half a thing: not enough to compute with, and in the way of every
+#     application that does not need it.
+#
+#   - No separate fiscal sex. `gender` in the base is the one axis, and a tax
+#     code calculator that needs one of two values treats anything else as a
+#     validation matter — asks, or refuses. Two columns overlapping on 95% of
+#     the rows would drift, and nothing would say which one is right.
+
+tables:
+
+  Partner:
+
+    columns:
+
+      # Date of birth. Not recycled for the incorporation date of an
+      # organization: the two are never the same question — "members turning 18
+      # this month" and "companies founded before 2000" would have to filter on
+      # `kind` to keep from catching each other — they do not carry the same
+      # privacy weight, and no name reads honestly for both. An organization
+      # gets `founded_on` when something needs to read it.
+      - name: birth_date
+        type: Date
+        label: "Date of birth"
+
+      # ISO 3166-1 alpha-2, the same alphabet every other country column speaks:
+      # the VAT prefix and the country of an e-invoice are alpha-2, and `IT` and
+      # `ITA` are one country that no filter matches twice. Two characters wide
+      # so the schema itself refuses the other coding.
+      #
+      # A plain code and not a foreign key: a country registry is a table this
+      # plugin does not have and should not invent. When it arrives it declares
+      # the foreign key on this same column by deep_merge.
+      - name: citizenship
+        type: UpperStr
+        length: 2
+        label: "Citizenship"
+        help: "ISO 3166-1 alpha-2 country code"

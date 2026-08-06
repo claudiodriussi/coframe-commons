@@ -32,6 +32,14 @@
 #     the same person. Role plugins declare their own, and they are separate
 #     columns precisely because they are separate things.
 #
+#   - No registry data of a natural person — birth date, citizenship, documents.
+#     They are in the `persons` plugin, and the line between the two is not
+#     "does it concern a person" but what the application does with them:
+#     everyone *writes to* people, since a company's contact is one, and title,
+#     gender and the channels serve that from here; only some applications
+#     *keep a registry* of them, and only those take `persons`. The privacy
+#     weight falls on the same side of that line.
+#
 #   - No `merged_into` pointer. A column that only means something together
 #     with the command maintaining it belongs with that command — here it would
 #     be inert, and an inert column invites a half-implemented merge. It comes
@@ -117,6 +125,23 @@ tables:
         label: "Title"
         help: "Mr., Mrs., Dr. — free text, suggestions come from the view"
 
+      # Composing the way one addresses someone, the same job `title` and the
+      # channels below do — which is why it is here and not in `persons`, where
+      # what an application keeps *about* a person lives.
+      #
+      # `M` and `F` are the values the code knows: agreement in correspondence,
+      # and the tax codes built from one of the two. Write the test on that side
+      # so the others land where a rule written before them expects. `N` is not
+      # the same as empty — asked and declined, against never asked.
+      #
+      # Not folded into `kind`: a property *of* a person, not an alternative to
+      # being one.
+      - name: gender
+        type: UpperStr
+        length: 1
+        label: "Gender"
+        help: "M male, F female, O other, N not declared"
+
       # Roles held, as a delimited set: ",C,S," — never packed characters.
       #
       # Delimiters are not decoration: searching ",C," can never match ",CO,",
@@ -173,11 +198,11 @@ tables:
       # until someone unifies them. They are indexed and drive the duplicate
       # warning on save.
       - name: vat_number
-        type: Code
+        type: UpperCode
         label: "VAT number"
 
       - name: tax_code
-        type: Code
+        type: UpperCode
         label: "Tax code"
 
       # Main address, inline. Additional addresses are child rows with a

@@ -1,0 +1,20 @@
+# The natural-person facet of `Partner`.
+#
+# It declares NO table of its own: it adds columns to `Partner` through
+# deep_merge. There is no `Person` — the single subject table is the whole point
+# of `partners`, and a person is one of its rows, told apart by `kind`.
+#
+# Why a plugin of its own, rather than more columns in the base: writing *to* a
+# person and registering a person as a *subject* are different jobs. Every
+# application does the first — a contact of a company is a person too, and the
+# base carries title, gender and the channels for it. Only some do the second,
+# and that is what lives here: birth data, citizenship, and in time documents
+# and consents. An application that never keeps a personal registry does not get
+# the columns at all, which is a position on personal data and not only tidiness.
+name: persons
+version: 0.0.1
+description: Natural person facet of Partner — registry data, opt-in
+license: MIT
+author: "Claudio Driussi"
+url: https://claudiodriussi.it
+depends_on: [partners]
