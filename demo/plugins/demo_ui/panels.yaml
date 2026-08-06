@@ -63,3 +63,14 @@ pages:
         order_by: [name]
         domain: [{roles: [like, "%,S,%"]}]
         defaults: {roles: ",S,"}
+
+  # Placement of a plugin-owned component. The partners plugin ships the
+  # component next to its model; where it surfaces is the application's call,
+  # which is why this page lives here and not there.
+  person_name_demo:
+    title: Person name (placeholder)
+    content:
+      type: plugin
+      component: partners.personname
+      props:
+        value: "Smith, John"
