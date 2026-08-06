@@ -40,10 +40,14 @@ tables:
         type: Date
         label: "Date of birth"
 
-      # ISO 3166-1 alpha-2, the same alphabet every other country column speaks:
-      # the VAT prefix and the country of an e-invoice are alpha-2, and `IT` and
-      # `ITA` are one country that no filter matches twice. Two characters wide
-      # so the schema itself refuses the other coding.
+      # ISO 3166-1 alpha-2, coded because things compute on it — the VAT prefix
+      # and the country of an e-invoice speak alpha-2 — and two characters wide
+      # so the schema itself refuses the other coding: `IT` and `ITA` are one
+      # country that no filter matches twice.
+      #
+      # The country of an address is free text instead, and deliberately: it is
+      # read, not computed with. An application that needs to compute derives
+      # `Address` and gives it a coded field.
       #
       # A plain code and not a foreign key: a country registry is a table this
       # plugin does not have and should not invent. When it arrives it declares

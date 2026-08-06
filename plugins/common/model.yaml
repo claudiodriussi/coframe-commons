@@ -125,9 +125,9 @@ types:
       - name: city
         type: String
       - name: state
-        type: String
+        type: ShortStr
       - name: zip
-        type: String
+        type: ShortStr
       - name: country
         type: String
 
