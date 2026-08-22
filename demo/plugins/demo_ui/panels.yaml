@@ -64,6 +64,98 @@ pages:
         domain: [{roles: [like, "%,S,%"]}]
         defaults: {roles: ",S,"}
 
+  # ── What the application adds to the form the plugin wrote ───────────────
+  #    Everything here is a merge: `partners` declares `partner_form` and this
+  #    names the containers it wants to reach into. Nothing is redeclared, so
+  #    the day the base form changes this file still applies.
+  #
+  #    The two policies, side by side. A field that belongs to the identity of
+  #    the record goes into the section and pays the reflow — the shop sign is
+  #    read every time the name is. A group that exists for a reason of its own
+  #    goes into a tab, where the user reads the grouping as information: the
+  #    other addresses are the same table under another `usage`, and the base
+  #    put its contacts in a `tabs` alone precisely so they could sit beside it.
+  partner_form:
+    content:
+      layout:
+        - id: identity
+          columns:
+            - id: left
+              fields:
+                - name: trade_name
+                  width: 30%
+                  $after: name
+
+        - id: reach
+          columns:
+            - id: left
+              fields:
+                - mobile
+                - website
+
+        - id: relations
+          pages:
+            - id: delivery_tab
+              label: Delivery addresses
+              count: delivery
+              $after: contacts_tab
+              layout:
+                - type: collection
+                  id: delivery
+                  model: Partner
+                  fk: parent_id
+                  form: partner_child_form
+                  domain: [{usage: [eq, delivery]}]
+                  defaults:
+                    usage: delivery
+                  view:
+                    type: table
+                    source:
+                      order_by: [name]
+                    columns:
+                      - field: name
+                        title: Name
+                      - field: address
+                        title: Address
+                      - field: zip
+                        title: Zip
+                        width: 90
+                      - field: city
+                        title: City
+                      - field: phone
+                        title: Phone
+                        width: 140
+
+            - id: invoice_tab
+              label: Billing addresses
+              count: invoice
+              $after: delivery_tab
+              layout:
+                - type: collection
+                  id: invoice
+                  model: Partner
+                  fk: parent_id
+                  form: partner_child_form
+                  domain: [{usage: [eq, invoice]}]
+                  defaults:
+                    usage: invoice
+                  view:
+                    type: table
+                    source:
+                      order_by: [name]
+                    columns:
+                      - field: name
+                        title: Name
+                      - field: address
+                        title: Address
+                      - field: zip
+                        title: Zip
+                        width: 90
+                      - field: city
+                        title: City
+                      - field: email
+                        title: Email
+
   # Placement of a plugin-owned component. The partners plugin ships the
   # component next to its model; where it surfaces is the application's call,
   # which is why this page lives here and not there.

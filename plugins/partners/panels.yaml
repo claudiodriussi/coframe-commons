@@ -45,7 +45,22 @@ pages:
                       label: Person
                   width: 20%
                 - name: name
-                  width: 55%
+                  width: 50%
+                # Addressing a subject, like `title` and the channels: it stays
+                # here rather than in `persons`, and it is the anchor that plugin
+                # hangs the registry data of a natural person from.
+                - name: gender
+                  widget: combobox
+                  choices:
+                    - value: M
+                      label: Male
+                    - value: F
+                      label: Female
+                    - value: O
+                      label: Other
+                    - value: N
+                      label: Not declared
+                  width: 20%
                 - filler:
                 - name: roles
                   width: 25%

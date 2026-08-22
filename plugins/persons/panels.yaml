@@ -1,0 +1,27 @@
+# What this plugin adds to a form it did not write.
+#
+# The rule it demonstrates: the plugin that brings a column brings its place in
+# the form too. `partners` draws the subject and knows nothing about registry
+# data of a natural person; an application that does not take `persons` gets
+# neither the columns nor these fields, and nobody had to arrange that.
+#
+# A merge, so nothing here is redeclared: the day the base form changes, this
+# file still applies. Registry data is identity and not a group, which is why it
+# goes into the section beside `gender` rather than into a tab of its own — a
+# tab is one click away, and what identifies a record is read every time.
+
+pages:
+
+  partner_form:
+    content:
+      layout:
+        - id: identity
+          columns:
+            - id: left
+              fields:
+                - name: birth_date
+                  width: 20%
+                  $after: gender
+                - name: citizenship
+                  width: 15%
+                  $after: birth_date
