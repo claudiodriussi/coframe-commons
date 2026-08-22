@@ -84,10 +84,17 @@ tables:
 
       # Parent subject, for rows that hang off another one: a contact person, a
       # delivery address, a billing address. Qualified by `usage` below.
+      # A child row is a *part* of its parent: a contact or an address means
+      # nothing without the subject it hangs off, so it goes when the subject
+      # goes. In practice a master is archived and never deleted, so what this
+      # really governs is the row deleted from the collection grid — which is a
+      # real delete, on a table that is Archivable for its masters. The verb
+      # belongs to the node, not to the table.
       - name: parent_id
         label: "Belongs to"
         foreign_key:
           target: Partner.id
+          owned: true
           # Named explicitly: the generated pair would be `partners_parent`,
           # correct and unreadable.
           relation: parent

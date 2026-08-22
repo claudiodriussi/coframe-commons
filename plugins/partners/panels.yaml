@@ -1,0 +1,175 @@
+# The base faces of a partner: the subject, and the people you talk to.
+#
+# What a shared plugin draws is what *every* application needs, not everything
+# the table can hold — a derived one adds the rest by naming the containers
+# below, which is why each of them carries an `id` (PLUGIN_MODEL § 2.2, § 2.5).
+#
+# Menu-silent like the rest of the commons: where these pages surface is the
+# application's call, and `demo_ui` is the one that makes it here.
+#
+# Widths are declared only where the fields on a line belong together — a postal
+# line reads as one thing, and a code that is short is short in every view. What
+# is left unpinned takes an equal share, and stays that way when somebody adds a
+# field to the line.
+
+pages:
+
+  # ── The subject ──────────────────────────────────────────────────────────
+  #    Lowercase, because that is how a list asks for the form of its model
+  #    (`{model}_form`): declaring it here makes it the form of a partner
+  #    everywhere, without a single view naming it.
+  partner_form:
+    title: Partner
+    content:
+      type: form
+      source:
+        model: Partner
+        id: $props.id
+      layout:
+
+        # Who the subject is, and the codes that identify it. `kind` is a closed
+        # set owned by the code, so its choices are written here instead of
+        # being looked up; `roles` stays a plain field until the set widget
+        # exists, and shows the stored ",C,S," as it is.
+        - id: identity
+          type: section
+          columns:
+            - id: left
+              fields:
+                - name: kind
+                  widget: combobox
+                  choices:
+                    - value: organization
+                      label: Organization
+                    - value: person
+                      label: Person
+                  width: 20%
+                - name: name
+                  width: 55%
+                - filler:
+                - name: roles
+                  width: 25%
+                - name: vat_number
+                  width: 22%
+                - name: tax_code
+                  width: 22%
+
+        # Where the subject is and how it is reached. The main address is inline
+        # on the row — further ones are child rows, which is why there is no
+        # address table. Street, zip and city are one postal line and are pinned
+        # as such; the channels below are not, and share what is left.
+        - id: reach
+          type: section
+          columns:
+            - id: left
+              fields:
+                - name: address
+                  width: 45%
+                - name: zip
+                  width: 12%
+                - name: city
+                  width: 28%
+                - filler:
+                - name: state
+                  width: 12%
+                - name: country
+                  width: 28%
+                - filler:
+                # A field with nothing to say about itself is written as its
+                # name: it is expanded on read, before the merge, so it stays as
+                # addressable as the long form.
+                - email
+                - phone
+
+        # One collection, and it still lives in a `tabs`: the band is the hook a
+        # derived application reaches for to put a sibling beside it — delivery
+        # and billing addresses are this same table under another `usage`. Alone,
+        # a single page wears the label of a band instead of a tab strip.
+        - id: relations
+          type: tabs
+          pages:
+            - id: contacts_tab
+              label: Contacts
+              count: contacts
+              layout:
+                # `domain` and `defaults` are one invariant seen from both ends:
+                # what you filter for, you stamp at creation — a row created
+                # here without the stamp would vanish from the view that made
+                # it. `kind` is stamped too: a contact is a person.
+                - type: collection
+                  id: contacts
+                  model: Partner
+                  fk: parent_id
+                  form: partner_child_form
+                  domain: [{usage: [eq, contact]}]
+                  defaults:
+                    usage: contact
+                    kind: person
+                  view:
+                    type: table
+                    source:
+                      order_by: [name]
+                    columns:
+                      - field: name
+                        title: Name
+                      - field: title
+                        title: Title
+                        width: 110
+                      - field: email
+                        title: Email
+                      - field: phone
+                        title: Phone
+                        width: 140
+                      - field: mobile
+                        title: Mobile
+                        width: 140
+
+  # ── A row that hangs off a subject ───────────────────────────────────────
+  #    The same table with the fields that make sense for a part: how to address
+  #    the person, and how to reach them. No roles and no tax codes — a contact
+  #    is not a party to anything. `parent_id`, `usage` and `kind` come from the
+  #    collection node and are never drawn: editing the stamp would move the row
+  #    into another tab under the operator's hands.
+  partner_child_form:
+    title: Contact
+    content:
+      type: form
+      source:
+        model: Partner
+        id: $props.id
+      layout:
+        - id: identity
+          type: section
+          columns:
+            - id: left
+              fields:
+                - name: title
+                  width: 20%
+                - name: name
+                  width: 55%
+                - filler:
+                - name: email
+                  width: 40%
+                - name: phone
+                  width: 22%
+                - name: mobile
+                  width: 22%
+
+        # A contact often sits at an address of its own — a branch office, a
+        # site. Left empty it simply means "where the subject is".
+        - id: reach
+          type: section
+          columns:
+            - id: left
+              fields:
+                - name: address
+                  width: 45%
+                - name: zip
+                  width: 12%
+                - name: city
+                  width: 28%
+                - filler:
+                - name: state
+                  width: 12%
+                - name: country
+                  width: 28%
