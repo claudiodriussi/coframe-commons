@@ -40,6 +40,12 @@ dataview:
 # Application locale
 locale: en
 
+# The timezone the stored naive datetimes are written in — the organisation's,
+# not the machine's. A process whose own clock disagrees refuses to start; an
+# app that declares nothing uses the process clock, unchecked. See
+# coframe.apptime.
+timezone: Europe/Rome
+
 menu:
   default_root: main
 
