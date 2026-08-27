@@ -10,7 +10,7 @@ demo.py, so both servers and the smoke test run the same application.
 Having the pair here is what makes double framework support a property that is
 checked rather than an intention: nothing else exercises the Flask path.
 
-Run from this directory:  uv run flask-server.py
+Run from this directory:  uv run server_flask.py
 """
 import os
 

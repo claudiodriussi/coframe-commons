@@ -74,7 +74,7 @@ particular, and neither does a checkout of the library.
 cd demo
 uv sync                          # .venv, and coframe in it
 uv run demo.py                   # generates model.py, creates the DB, smoke test
-uv run flask-server.py           # or fastapi-server.py — http://localhost:8302
+uv run server_flask.py           # or server_fastapi.py — http://localhost:8302
 ```
 
 Dev credentials: `admin` / `admin`.

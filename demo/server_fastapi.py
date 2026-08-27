@@ -7,7 +7,7 @@ on the application itself, because this file *is* the application. Plugin
 loading, model generation and the admin seed come from demo.py, so the smoke
 test and the server always run the same application.
 
-Run from this directory:  uv run fastapi-server.py
+Run from this directory:  uv run server_fastapi.py
 """
 import os
 
