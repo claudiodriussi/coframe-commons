@@ -7,7 +7,7 @@ on the application itself, because this file *is* the application. Plugin
 loading, model generation and the admin seed come from demo.py, so the smoke
 test and the server always run the same application.
 
-Run from this directory:  python fastapi-server.py
+Run from this directory:  uv run fastapi-server.py
 """
 import os
 
@@ -15,8 +15,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-import demo  # also puts the coframe package on sys.path  # noqa: E402
-import coframe.server_utils as srv  # noqa: E402
+import demo
+import coframe.server_utils as srv
 
 # ── Application ─────────────────────────────────────────────────────────────
 
@@ -52,8 +52,8 @@ srv.register_fastapi(app, coframe_app, plugins, SECRET_KEY)
 
 
 # A built client, when there is one — mounted last so the API routes win.
-if os.path.isdir("static_client"):
-    app.mount("/", StaticFiles(directory="static_client", html=True), name="client")
+if os.path.isdir("static"):
+    app.mount("/", StaticFiles(directory="static", html=True), name="client")
 
 
 if __name__ == "__main__":

@@ -10,15 +10,15 @@ demo.py, so both servers and the smoke test run the same application.
 Having the pair here is what makes double framework support a property that is
 checked rather than an intention: nothing else exercises the Flask path.
 
-Run from this directory:  python flask-server.py
+Run from this directory:  uv run flask-server.py
 """
 import os
 
 from flask import Flask, send_from_directory
 from flask_cors import CORS
 
-import demo  # also puts the coframe package on sys.path  # noqa: E402
-import coframe.server_utils as srv  # noqa: E402
+import demo
+import coframe.server_utils as srv
 
 # ── Application ─────────────────────────────────────────────────────────────
 
@@ -49,14 +49,14 @@ srv.register_flask(app, coframe_app, plugins, SECRET_KEY)
 
 # A built client, when there is one — registered last so the API routes win.
 # The catch-all serves index.html for unknown paths, as a SPA needs.
-if os.path.isdir("static_client"):
+if os.path.isdir("static"):
 
     @app.route("/", defaults={"path": ""})
     @app.route("/<path:path>")
     def client(path):
-        if path and os.path.isfile(os.path.join("static_client", path)):
-            return send_from_directory("static_client", path)
-        return send_from_directory("static_client", "index.html")
+        if path and os.path.isfile(os.path.join("static", path)):
+            return send_from_directory("static", path)
+        return send_from_directory("static", "index.html")
 
 
 if __name__ == "__main__":
