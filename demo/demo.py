@@ -3,22 +3,12 @@
 Slim analogue of coframe's devtest.py: loads the plugin root, computes the DB
 schema, regenerates model.py, initialises the sqlite DB and runs a smoke test.
 
-Run from this directory:  python demo.py
+Run from this directory:  uv run demo.py
 """
-import sys
-from pathlib import Path
-
-# Reach the coframe library package. This repo is a sibling of the coframe
-# checkout in the development workspace; override with COFRAME_PATH when it
-# lives somewhere else.
-import os  # noqa: E402
-_lib = os.environ.get("COFRAME_PATH", "../../coframe")
-sys.path.append(str(Path(_lib).resolve()))
-
-import coframe  # noqa: E402
-import coframe.plugins  # noqa: E402
-import coframe.utils  # noqa: E402
-import coframe.source  # noqa: E402
+import coframe
+import coframe.plugins
+import coframe.utils
+import coframe.source
 
 
 def setup(generate: bool = True):

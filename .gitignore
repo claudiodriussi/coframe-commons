@@ -5,9 +5,15 @@ __pycache__/
 
 # Demo app runtime artefacts (model.py is generated from the YAML schema)
 demo/model.py
+# The compiled client: an artifact, rebuilt with `pnpm build:app`
+demo/static/
 demo/*.sqlite
 demo/*.log
 demo/data/
+
+# The demo's lock file: the dependency floats on `main` until coframe has a
+# newer release tag, so a locked commit would only freeze an arbitrary one.
+demo/uv.lock
 
 # Editors / environments
 .venv

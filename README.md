@@ -15,6 +15,8 @@ reasons, which is why they are separate repositories.
 plugins/          the shared root — one directory per subject, each a plugin
   common/           reusable types (ID, Money, Address, Archivable…) + Config
   users/            User, UserLog
+  partners/         Partner — one subject table, roles as a set
+  persons/          natural-person facet of Partner, opt-in
 demo/             reference app: the only consumer shipped with the plugins
 ```
 
@@ -63,12 +65,35 @@ app.add_query_behavior(Archivable)
 without dragging in a real customer application. It points at `../plugins` the
 same way an external app would.
 
+It has its own `pyproject.toml` and its own virtual environment, and declares
+coframe as a dependency fetched from the published repository — like any
+application would. It does not need this repository to sit anywhere in
+particular, and neither does a checkout of the library.
+
 ```bash
-cd demo && python demo.py        # generates model.py, creates the DB, smoke test
+cd demo
+uv sync                          # .venv, and coframe in it
+uv run demo.py                   # generates model.py, creates the DB, smoke test
+uv run flask-server.py           # or fastapi-server.py — http://localhost:8302
 ```
 
-Dev credentials: `admin` / `admin`. It expects the coframe checkout as a
-sibling of this repository; set `COFRAME_PATH` if it lives elsewhere.
+Dev credentials: `admin` / `admin`.
+
+Its admin client is the generic shell, built from a `coframe-ui` checkout,
+which is told where this app is and needs to know nothing else:
+
+```bash
+COFRAME_APP_ROOT=/path/to/commons/demo pnpm --filter shell dev
+```
+
+Working on the library at the same time? Install it over the top of the
+dependency, and run through the venv — `uv run` re-syncs to what
+`pyproject.toml` says and would silently put the published version back:
+
+```bash
+uv pip install -e /path/to/coframe
+.venv/bin/python demo.py
+```
 
 ## License
 
