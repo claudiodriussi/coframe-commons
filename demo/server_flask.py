@@ -15,7 +15,6 @@ Run from this directory:  uv run server_flask.py
 import os
 
 from flask import Flask, send_from_directory
-from flask_cors import CORS
 
 import demo
 import coframe.server_utils as srv
@@ -36,11 +35,6 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "development-secret-key-not-for-servic
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = SECRET_KEY
-# expose_headers: the refresh token travels in a response header, and a
-# browser hides those from JS across origins — which is what dev is, with
-# the Vite server on a port of its own. Without it the client never sees a
-# refreshed token in development, silently.
-CORS(app, expose_headers=["X-New-Token"])
 
 # ── Routes ──────────────────────────────────────────────────────────────────
 

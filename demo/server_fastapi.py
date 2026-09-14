@@ -12,7 +12,6 @@ Run from this directory:  uv run server_fastapi.py
 import os
 
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 import demo
@@ -36,14 +35,6 @@ app = FastAPI(
     title="Coframe commons demo",
     description="Reference app for the shared plugins",
     version=plugins.config.get("version", "0.0.0"),
-)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
 )
 
 # ── Routes ──────────────────────────────────────────────────────────────────
