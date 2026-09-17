@@ -29,7 +29,16 @@ views:
       - field: phone
         title: Phone
         width: 140
-    navigator: true
+    # Partner is Archivable; the command is declared, not injected
+    # (navigator.md §4h), and once here it reaches all three lists. The server
+    # answers with the menu: the view to show, the verb that fits the row.
+    navigator:
+      commands:
+        - id: archive
+          label: Archive
+          scope: global
+          key: a
+          endpoint: archivable
 
 pages:
 
