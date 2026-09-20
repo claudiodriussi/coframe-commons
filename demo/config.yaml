@@ -8,7 +8,6 @@ version: 0.0.1
 description: "Reference app for the coframe shared plugins"
 license: MIT
 author: "Claudio Driussi"
-log_file: "demo.log"
 
 # plugin roots.
 #
