@@ -13,13 +13,17 @@ author: "Claudio Driussi"
 #
 # `../plugins` is the sibling shared root: this repo *is* that root, and the
 # demo consumes it exactly as an external app would (relative path, out of its
-# own tree). It takes the whole root — this is the showcase of the repository,
-# so a shared plugin added there shows up without an edit here.
+# own tree, plugins named one by one). A shared plugin added there stays inert
+# here too until it is listed: one that is still being built cannot break the
+# showcase.
 #
 # `plugins` is the demo's own root, and it holds what belongs to the
 # application rather than to the shared plugins: the menu, and the views whose
 # domain names a role code.
-plugins: [../plugins, plugins]
+plugins:
+  - path: ../plugins
+    include: [common, users, persons, partners]
+  - plugins
 
 # db engine for sqlalchemy
 db_engine: "sqlite:///demo.sqlite"

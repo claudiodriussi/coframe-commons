@@ -17,6 +17,7 @@ plugins/          the shared root — one directory per subject, each a plugin
   users/            User, UserLog
   partners/         Partner — one subject table, roles as a set
   persons/          natural-person facet of Partner, opt-in
+  reports/          printing through AndRep — under construction
 demo/             reference app: the only consumer shipped with the plugins
 ```
 
