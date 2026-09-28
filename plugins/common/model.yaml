@@ -141,17 +141,22 @@ types:
       # timezone the app declares rather than the one the process happens to
       # run in (coframe.apptime). It is also the single place that answers
       # "when is now", so moving the storage to UTC one day is one function.
+      #
+      # `query_rank: more`: asked when something looks wrong, not every day, so
+      # the query editor keeps them behind "Show more".
       - name: created_at
         type: DateTime
         granularity: second
         default: $now
         nullable: False
+        query_rank: more
       - name: updated_at
         type: DateTime
         granularity: second
         default: $now
         onupdate: $now
         nullable: False
+        query_rank: more
 
   # Five columns that always travel together, declared once: every table that
   # has an address has the same one, and widening it here reaches them all.
@@ -177,11 +182,14 @@ types:
   Archivable:
     label: "Archivable"
     columns:
+      # `query_rank: more`: the archive command is how a list chooses active,
+      # archived or all; a condition on the flag is the rare case.
       - name: active
         type: Boolean
         default: true
         nullable: false
         label: "Active"
+        query_rank: more
 
   # What makes a table able to log in. Kept as one unit because authentication
   # reads all of it — the application points its `authentication` config at any
