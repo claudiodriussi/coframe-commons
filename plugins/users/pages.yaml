@@ -1,0 +1,65 @@
+# The pages of the users plugin: the user form with its password, and the page
+# where anyone changes their own.
+
+pages:
+
+  # Declared rather than generated: the generated form leaves the password out,
+  # because the column is `secret` and never reaches the client. Here it is in,
+  # and empty on every load: typing sets a new one, hashed on the way in by the
+  # column's `on_write`; leaving it empty leaves it as it is. A new user needs
+  # one, and the database says so when it is missing.
+  #
+  # Hand-written fields carry no column attributes: labels, types and widgets
+  # are stated here.
+  user_form:
+    title: User
+    content:
+      type: form
+      source:
+        model: User
+        id: $props.id
+      fields:
+        - name: name
+          label: Name
+        - name: username
+          label: Username
+        - name: email
+          label: Email
+        - name: password
+          label: Password
+          widget: password
+          help: Leave it empty to keep the current one. A new user needs one.
+        - name: is_active
+          label: Active
+          type: Boolean
+        - name: is_admin
+          label: Administrator
+          type: Boolean
+      actions:
+        toolbar: [save, cancel]
+
+  # One's own password, which needs the current one: it is what stands between
+  # a session left open on someone else's desk and a password that changes hands.
+  # Setting another user's password is the user form's job, for who can edit
+  # users.
+  password_change:
+    title: Change password
+    content:
+      type: form
+      source:
+        endpoint: password_form
+        save_endpoint: change_password
+      fields:
+        - name: current
+          label: Current password
+          widget: password
+        - name: new
+          label: New password
+          widget: password
+        - name: confirm
+          label: Repeat the new password
+          widget: password
+      policy:
+        editable: true
+      actions:
+        toolbar: [save]

@@ -75,6 +75,9 @@ types:
     # "unchanged" — the client has no way of echoing back what it cannot read.
     secret: true
     on_write: password_hash
+    # The rules a new password must pass (common/validators.py), set in the
+    # application's config.yaml under `password_policy:`.
+    validate: password_policy
 
   Email:
     base: String

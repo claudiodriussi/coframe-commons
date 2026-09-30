@@ -16,4 +16,11 @@ register_translations('it', {
     'Already active': 'Già attivo',
     '{n} archived': '{n} archiviati',
     '{n} restored': '{n} ripristinati',
+    'At least {n} characters': 'Almeno {n} caratteri',
+    'It needs {what}': 'Serve {what}',
+    'a lowercase letter': 'una lettera minuscola',
+    'an uppercase letter': 'una lettera maiuscola',
+    'a digit': 'una cifra',
+    'a symbol': 'un simbolo',
+    'It must not contain the username': 'Non deve contenere il nome utente',
 })
