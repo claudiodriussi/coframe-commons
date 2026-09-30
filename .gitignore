@@ -6,7 +6,7 @@ __pycache__/
 # Demo app runtime artefacts (model.py is generated from the YAML schema)
 demo/model.py
 # The compiled client: an artifact, rebuilt with `pnpm build:app`
-demo/static/
+demo/clientui/
 demo/*.sqlite
 demo/*.log
 demo/data/

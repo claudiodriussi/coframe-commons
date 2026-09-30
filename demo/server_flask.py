@@ -14,7 +14,7 @@ Run from this directory:  uv run server_flask.py
 """
 import os
 
-from flask import Flask, send_from_directory
+from flask import Flask
 
 import demo
 import coframe.server_utils as srv
@@ -41,16 +41,9 @@ app.config["SECRET_KEY"] = SECRET_KEY
 srv.register_flask(app, coframe_app, plugins, SECRET_KEY)
 
 
-# A built client, when there is one — registered last so the API routes win.
-# The catch-all serves index.html for unknown paths, as a SPA needs.
-if os.path.isdir("static"):
-
-    @app.route("/", defaults={"path": ""})
-    @app.route("/<path:path>")
-    def client(path):
-        if path and os.path.isfile(os.path.join("static", path)):
-            return send_from_directory("static", path)
-        return send_from_directory("static", "index.html")
+# A built client, when there is one: `clientui/`, mounted where `client:` in
+# config.yaml says - at the root, the demo being the application itself.
+srv.serve_client_flask(app, os.path.dirname(os.path.abspath(__file__)), plugins.config)
 
 
 if __name__ == "__main__":

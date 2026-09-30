@@ -33,6 +33,11 @@ api:
   prefix: "coframe"
   port: 8302           # devtest 8300, artmob 8301, demo 8302
 
+# What coframe is here: the application itself, so its client owns "/" and logs
+# people in (coframe.clientui). An admin of a host would say `role: admin`.
+client:
+  role: app
+
 schema:
   display_field_names: [name, title, description]
 
